@@ -8,7 +8,7 @@ id: ID!
 firstName: String!
 lastName: String
 email: String!
-profileImageURL: String
+profileImageURL: String 
 
 
 }
