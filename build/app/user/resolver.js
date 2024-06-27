@@ -37,6 +37,38 @@ const extraRessolver = {
                 where: { author: { id: parent.id } },
             });
         },
+        followers: (parent) => __awaiter(void 0, void 0, void 0, function* () {
+            const result = yield Db_1.prismaClient.follows.findMany({
+                where: { following: { id: parent.id } },
+                include: {
+                    follower: true,
+                },
+            });
+            return result.map((el) => el.follower);
+        }),
+        following: (parent) => __awaiter(void 0, void 0, void 0, function* () {
+            const result = yield Db_1.prismaClient.follows.findMany({
+                where: { follower: { id: parent.id } },
+                include: {
+                    following: true,
+                },
+            });
+            return result.map((el) => el.following);
+        }),
     },
 };
-exports.resolver = { queries, extraRessolver };
+const mutations = {
+    followUser: (parent_3, _d, ctx_2) => __awaiter(void 0, [parent_3, _d, ctx_2], void 0, function* (parent, { to }, ctx) {
+        if (!ctx.user || !ctx.user.id)
+            throw new Error("unauthorized");
+        yield user_1.default.followUser(ctx.user.id, to);
+        return true;
+    }),
+    unfollowUser: (parent_4, _e, ctx_3) => __awaiter(void 0, [parent_4, _e, ctx_3], void 0, function* (parent, { to }, ctx) {
+        if (!ctx.user || !ctx.user.id)
+            throw new Error("unauthorized");
+        yield user_1.default.unfollowUser(ctx.user.id, to);
+        return true;
+    }),
+};
+exports.resolver = { queries, extraRessolver, mutations };
