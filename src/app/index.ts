@@ -13,6 +13,7 @@ export async function initServer() {
 
   app.use(bodyParser.json());
   app.use(cors());
+
   const graphqlServer = new ApolloServer<GraphqlContext>({
     typeDefs: `
       ${User.type}
