@@ -55,6 +55,28 @@ const extraRessolver = {
             });
             return result.map((el) => el.following);
         }),
+        recommendedUsers: (parent, _, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+            if (!ctx.user)
+                return [];
+            const myfollowers = yield Db_1.prismaClient.follows.findMany({
+                where: { follower: { id: ctx.user.id } },
+                include: {
+                    following: {
+                        include: { followers: { include: { following: true } } },
+                    },
+                },
+            });
+            const users = [];
+            for (const followings of myfollowers) {
+                for (const followingOfFollowedUser of followings.following.followers) {
+                    if (followingOfFollowedUser.following.id !== ctx.user.id &&
+                        myfollowers.findIndex((el) => (el === null || el === void 0 ? void 0 : el.followingId) === followingOfFollowedUser.following.id) < 0) {
+                        users.push(followingOfFollowedUser.following);
+                    }
+                }
+            }
+            return users;
+        }),
     },
 };
 const mutations = {
