@@ -5,4 +5,4 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.redisClient = void 0;
 const ioredis_1 = __importDefault(require("ioredis"));
-exports.redisClient = new ioredis_1.default("rediss://default:AcjEAAIncDE5YTcwZDM1ZTEzYjY0Y2MzOWEyNzEyZWUzYzc3MGNmNHAxNTEzOTY@adapted-fish-51396.upstash.io:6379");
+exports.redisClient = new ioredis_1.default(process.env.REDIS_URI);

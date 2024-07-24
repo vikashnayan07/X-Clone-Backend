@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const Db_1 = require("../client/Db");
 const jwt_1 = __importDefault(require("./jwt"));
-const redis_1 = require("../client/Db/redis");
 class UserServices {
     static verifyGoogleAuthToken(token) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -48,36 +47,21 @@ class UserServices {
         });
     }
     static getUserById(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cachedUser = yield redis_1.redisClient.get("GET_USER");
-            if (cachedUser)
-                return JSON.parse(cachedUser);
-            const getUser = yield Db_1.prismaClient.user.findUnique({ where: { id } });
-            yield redis_1.redisClient.set("GET_USER", JSON.stringify(getUser));
-            return getUser;
-        });
+        return Db_1.prismaClient.user.findUnique({ where: { id } });
     }
     static followUser(from, to) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const followsUser = Db_1.prismaClient.follows.create({
-                data: {
-                    follower: { connect: { id: from } },
-                    following: { connect: { id: to } },
-                },
-            });
-            yield redis_1.redisClient.del("GET_USER");
-            return followsUser;
+        return Db_1.prismaClient.follows.create({
+            data: {
+                follower: { connect: { id: from } },
+                following: { connect: { id: to } },
+            },
         });
     }
     static unfollowUser(from, to) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const unfollowsUser = yield Db_1.prismaClient.follows.delete({
-                where: {
-                    followerId_followingId: { followerId: from, followingId: to },
-                },
-            });
-            yield redis_1.redisClient.del("GET_USER");
-            return unfollowsUser;
+        return Db_1.prismaClient.follows.delete({
+            where: {
+                followerId_followingId: { followerId: from, followingId: to },
+            },
         });
     }
 }

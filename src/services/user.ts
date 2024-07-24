@@ -57,32 +57,24 @@ class UserServices {
 
     return tokenUser;
   }
-  public static async getUserById(id: string) {
-    const cachedUser = await redisClient.get("GET_USER");
-    if (cachedUser) return JSON.parse(cachedUser);
-    const getUser = await prismaClient.user.findUnique({ where: { id } });
-    await redisClient.set("GET_USER", JSON.stringify(getUser));
-    return getUser;
+  public static getUserById(id: string) {
+    return prismaClient.user.findUnique({ where: { id } });
   }
 
-  public static async followUser(from: string, to: string) {
-    const followsUser = prismaClient.follows.create({
+  public static followUser(from: string, to: string) {
+    return prismaClient.follows.create({
       data: {
         follower: { connect: { id: from } },
         following: { connect: { id: to } },
       },
     });
-    await redisClient.del("GET_USER");
-    return followsUser;
   }
-  public static async unfollowUser(from: string, to: string) {
-    const unfollowsUser = await prismaClient.follows.delete({
+  public static unfollowUser(from: string, to: string) {
+    return prismaClient.follows.delete({
       where: {
         followerId_followingId: { followerId: from, followingId: to },
       },
     });
-    await redisClient.del("GET_USER");
-    return unfollowsUser;
   }
 }
 export default UserServices;
