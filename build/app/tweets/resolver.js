@@ -13,13 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resolver = void 0;
-const client_s3_1 = require("@aws-sdk/client-s3");
-const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const user_1 = __importDefault(require("../../services/user"));
 const tweet_1 = __importDefault(require("../../services/tweet"));
-const s3Client = new client_s3_1.S3Client({
-    region: process.env.AWS_DEFAULT_REGION,
-});
+const media_1 = __importDefault(require("../../services/media"));
 const queries = {
     getAllTweets: () => {
         return tweet_1.default.getAllTweets();
@@ -27,20 +23,8 @@ const queries = {
     getSingnedURLForTweet: (parent_1, _a, ctx_1) => __awaiter(void 0, [parent_1, _a, ctx_1], void 0, function* (parent, { imageType, imageName }, ctx) {
         if (!ctx.user || !ctx.user.id)
             throw new Error("Unothorized user");
-        const allowedImageType = [
-            "image/jpg",
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-        ];
-        if (!allowedImageType.includes(imageType))
-            throw new Error("Invalid image Type");
-        const putObjectCommand = new client_s3_1.PutObjectCommand({
-            Bucket: process.env.AWS_S3_BUCKET,
-            Key: `update/${ctx.user.id}/tweets/${imageName}-${Date.now()}.${imageType}`,
-        });
-        const signedURL = (0, s3_request_presigner_1.getSignedUrl)(s3Client, putObjectCommand);
-        return signedURL;
+        const blobName = media_1.default.getBlobName(ctx.user.id, imageName, imageType);
+        return media_1.default.getSignedUploadUrl(blobName, imageType);
     }),
 };
 const mutaion = {
